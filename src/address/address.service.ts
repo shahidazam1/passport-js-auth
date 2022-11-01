@@ -1,15 +1,16 @@
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 
 @Injectable()
 export class AddressService {
-  create(createAddressDto: CreateAddressDto) {
-    return 'This action adds a new address';
+  constructor(private readonly prismaService: PrismaService) {}
+  create(data: any) {
+    return this.prismaService.address.create({ data });
   }
 
   findAll() {
-    return `This action returns all address`;
+    return this.prismaService.address.findMany();
   }
 
   findOne(id: number) {

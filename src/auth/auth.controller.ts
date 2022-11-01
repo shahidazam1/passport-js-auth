@@ -8,7 +8,13 @@ export class AuthController {
 
   @Post('/login')
   @UseGuards(AuthGuard('local'))
-  login(@Request() req): string {
-    return req.user;
+  login(@Request() req): any {
+    const value = this.authService.generateToken(req.user);
+
+    const data = {
+      accessToken: value,
+      userId: req.user.id,
+    };
+    return data;
   }
 }
