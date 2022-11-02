@@ -16,8 +16,4 @@ export class CreateAddressDto {
   @IsNotEmpty()
   @IsString()
   state: string;
-
-  @IsNotEmpty()
-  @IsString()
-  personId?: string;
 }

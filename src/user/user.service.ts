@@ -1,17 +1,44 @@
+import { AuthService } from './../auth/auth.service';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
-  create(createUserDto: CreateUserDto) {
-    return this.prismaService.user.create({ data: createUserDto });
+  constructor(
+    private readonly prismaService: PrismaService,
+    private authService: AuthService,
+  ) {}
+  async create(createUserDto: CreateUserDto) {
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const userCreated = await this.prismaService.user.create({
+      data: {
+        password: hashedPassword,
+        name: createUserDto.name,
+        email: createUserDto.email,
+      },
+    });
+
+    const value = this.authService.generateToken({
+      userId: userCreated.id,
+      email: userCreated.email,
+    });
+
+    const data = {
+      accessToken: value,
+      userId: userCreated.id,
+    };
+    return data;
   }
 
   findAll() {
-    return this.prismaService.user.findMany();
+    return this.prismaService.user.findMany({
+      include: {
+        address: true,
+      },
+    });
   }
 
   findOne(id: number) {
@@ -26,7 +53,7 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    return await this.prismaService.user.delete({ where: { id } });
   }
 }

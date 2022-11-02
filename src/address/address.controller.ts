@@ -19,18 +19,26 @@ export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Post()
-  create(@Body() createAddressDto: CreateAddressDto) {
-    return this.addressService.create(createAddressDto);
+  @UseGuards(AuthGuard('jwt'))
+  async create(@Body() createAddressDto: CreateAddressDto, @Request() req) {
+    const userId = await req.user.userId;
+
+    return this.addressService.create(createAddressDto, userId);
+    // return req.user;
   }
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  findAll(@Request() req) {
-    // return this.addressService.findAll();
-    return req.user;
+  async findAll(@Request() req) {
+    const userId = await req.user.userId;
+
+    return await this.addressService.findAll(userId);
+
+    // return req.user;
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
   findOne(@Param('id') id: string) {
     return this.addressService.findOne(+id);
   }

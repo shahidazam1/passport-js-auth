@@ -5,16 +5,18 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 @Injectable()
 export class AddressService {
   constructor(private readonly prismaService: PrismaService) {}
-  create(data: any) {
-    return this.prismaService.address.create({ data });
+  create(data: any, userId: any) {
+    return this.prismaService.address.create({
+      data: { ...data, personId: userId },
+    });
   }
 
-  findAll() {
-    return this.prismaService.address.findMany();
+  findAll(userId) {
+    return this.prismaService.address.findMany({ where: { personId: userId } });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} address`;
+    return this.prismaService.address.findUnique({ where: { id } });
   }
 
   update(id: number, updateAddressDto: UpdateAddressDto) {
